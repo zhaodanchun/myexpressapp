@@ -1,0 +1,769 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>堆塔游戏测试</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- S 引用前端页面片 -->
+    <!--#include virtual="/sinclude/cssi/fd/h5/1612/store/game.shtml" -->
+    <!-- E 引用前端页面片 -->
+
+    <!-- global:css -->
+
+    <!-- endglobal -->
+
+    <script type="text/javascript">
+        ! function() {
+            var maxWidth = 768;
+            document.write('<style id="o2HtmlFontSize"></style>');
+            var o2_resize = function() {
+                        var cw, ch;
+                        if (document && document.documentElement) {
+                            cw = document.documentElement.clientWidth, ch = document.documentElement.clientHeight;
+                        }
+                        if (!cw || !ch) {
+                            if (window.localStorage["o2-cw"] && window.localStorage["o2-ch"]) {
+                                cw = parseInt(window.localStorage["o2-cw"]), ch = parseInt(window.localStorage["o2-ch"]);
+                            } else {
+                                chk_cw(); //定时检查
+                                return; //出错了
+                            }
+                        }
+                        var zoom = maxWidth && maxWidth < cw ? maxWidth / 375 : cw / 375,
+                                zoomY = ch / 603; //由ip6 weChat
+                        window.localStorage["o2-cw"] = cw, window.localStorage["o2-ch"] = ch;
+                        //zoom=Math.min(zoom,zoomY);//保证ip6 wechat的显示比率
+                        window.zoom = window.o2Zoom = zoom;
+                        document.getElementById("o2HtmlFontSize").innerHTML = 'html{font-size:' + (zoom * 20) + 'px;}.o2-zoom,.zoom{zoom:' + (zoom / 2) + ';}.o2-scale{-webkit-transform: scale(' + zoom / 2 + '); transform: scale(' + zoom / 2 + ');}';
+                    },
+                    siv,
+                    chk_cw = function() {
+                        if (siv) return; //已经存在
+                        siv = setInterval(function() {
+                            //定时检查
+                            document && document.documentElement && document.documentElement.clientWidth && document.documentElement.clientHeight && (o2_resize(), clearInterval(siv), siv = undefined);
+                        }, 100);
+                    };
+            o2_resize(); //立即初始化
+            window.addEventListener("resize", o2_resize);
+        }();
+    </script>
+    <!--#include virtual="/sinclude/common/head_inc.shtml"-->
+    <!--#include virtual="/sinclude/common/head_shortcut.shtml"-->
+    <!--#include virtual="/sinclude/promote/spa.html"-->
+
+    <!--PPMS配置-->
+    <!--#include virtual="/sinclude/update/wx/2016/12/storesns.html"-->
+
+
+    <!--# include virtual="/sinclude/update/wx/2016/12/store_js.html"-->
+
+
+
+
+    <script type="text/javascript">
+        var getImg = JD.img.getImgUrl;
+        var nowurl = location.protocol+'//'+location.host+location.pathname;
+    </script>
+    <style>
+        .wx_footer, .qq_footer, #promote_foot, .wxsq_topTips, .common_xinren_bar{
+            display: none;
+        }
+        header .rule {
+            z-index:10;
+        }
+        .dialog .dia_btn {
+            width: 5.7rem;
+        }
+        .wg_view {
+            height: 100%;
+        }
+    </style>
+</head>
+<!-- 注：加ontouchstart使css：active生效 -->
+
+<body ontouchstart="">
+<div id="container" style="height: 100%;"></div>
+
+<div class="mask"></div>
+
+
+<div class="share" id="defaultshare">
+    <!-- 开发注意 加入show为显示态，默认不显示 -->
+    <img class="share_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/share_pic_bd951200.png" width="100%" alt="分享图">
+    <img class="light" src="//wq.360buyimg.com/fd/h5/1612/store/images/light_8b4a71ec.png" alt="">
+    <p style="display: block" id="sharetext"></p>
+</div>
+
+
+<div class="share" id="xuanshare">
+    <!-- 开发注意 加入show为显示态，默认不显示 -->
+    <img class="share_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/share_pic_bd951200.png" width="100%" alt="分享图">
+    <img class="light" src="//wq.360buyimg.com/fd/h5/1612/store/images/light_8b4a71ec.png" alt="">
+    <p style="display: block" id="xuantext"></p>
+</div>
+
+<div class="share" id="resumeshare">
+    <!-- 开发注意 加入show为显示态，默认不显示 -->
+    <img class="share_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/share_pic_bd951200.png" width="100%" alt="分享图">
+    <img class="light" src="//wq.360buyimg.com/fd/h5/1612/store/images/light_8b4a71ec.png" alt="">
+    <p style="display: block">分享给好友，可获得原地复活机会，<br>堆到55层，可抽大奖哟~</p>
+</div>
+
+
+<div class="dialog dialog_prize dialog_position" style="display:none;left: 50%;top: 50%; -webkit-transform: translate3d(-50%,-50%,0); transform: translate3d(-50%,-50%,0); position: fixed;" id="errordialog">
+    <!-- 没抽中 S -->
+    <div class="dia_prize">
+        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/dia_pri3_dbe53f96.png">
+        <p>活动太火爆了~<br>请稍后再试！</p>
+    </div>
+    <!-- 没抽中 E -->
+    <a href="javascript:;" class="dia_btn" title="去卖场逛逛" tag="gosale">去卖场逛逛</a>
+    <a href="javascript:;" class="dia_close" tag="gosale" title="关闭">x</a>
+</div>
+
+<script type="text/html" id="share">
+    <div class="wrapper share-take" style="overflow: auto">
+        <div class="main show">
+            <img class="main_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/grid_9b0f1b3b.png" width="100%">
+            <img class="main_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/spots_e5a37132.png" width="100%">
+            <div class="main_con">
+                <img class="logo" src="//wq.360buyimg.com/fd/h5/1612/store/images/sq_logo_bc6dad92.png" alt="手q" tag="sqlogo">
+                <!--开发注意 加入show 显示当前的logo -->
+                <img class="logo" src="//wq.360buyimg.com/fd/h5/1612/store/images/wx_logo_2f78e2ed.png" alt="微信" tag="wxlogo">
+                <!--开发注意 加入show 显示当前的logo -->
+                <a href="javascript:;" tag="rule" class="spr btn_rule" title="活动规则">活动规则</a>
+                <p class="act_time">12月21日京东存储超值特卖</p>
+                <div class="run_txt" id="scroll_div">
+                    <p id="scroll_begin">
+                    </p>
+                    <p id="scroll_end"></p>
+                </div>
+                <img class="user_tx" src="//wq.360buyimg.com/fd/h5/1612/store/images/pic_979e05d9.jpg" alt="头像" tag="ulogo">
+                <p class="user_name" tag="unanme"></p>
+                <p class="fir_txt" tag="utext"></p>
+                <a href="javascript:;" class="spr gogame_btn" title="我要玩游戏" hash="home" tag="shareback" wxptag="137282.5.1" mqptag="137283.5.1">我要玩游戏<span></span></a>
+                <p class="jion">
+                    <span class="jion_num" tag="joinnum"></span>
+                    <span class="jion_yes"><i><b class="show" tag="subscribeBtn"></b></i>预约存储大促卖场</span>
+                </p>
+            </div>
+        </div>
+        <!-- 吸底 S -->
+        <div class="fix_bot show">
+            <nav>
+                <a href="javascript:;" hash="myjoin" title="我的奖品" wxptag="137282.6.1" mqptag="137283.6.1">我的奖品</a>
+                <a href="javascript:;" tag="gosale" title="去卖场逛逛" wxptag="137282.6.2" mqptag="137283.6.2">去卖场逛逛</a>
+            </nav>
+        </div>
+        <!-- 吸底 E -->
+        <div class="dialog dialog_rule dialog_position" tag="rulediv">
+            <!-- 开发注意 加入 dialog_position 为其添加绝对居中样式，加show控制隐藏或显示 -->
+            <p class="dia_r_t">活动规则</p>
+            <div class="dia_t_b">
+                <p>一、活动时间：2016年12月15日 00:00:00-12月20日23:59:59；</p>
+                <p>二、参与方式</p>
+                <p>1、进入“堆塔传奇”活动页面，点击“开始游戏”进入游戏页面， 当上方浮动的“砖块”正好与下面砖块完全重叠时，用手指触动手机屏，由此一层层堆起来。注意：</p>
+                <p>1）在堆的过程中，未完全重叠部分边角将会被切除，当连续三块砖块完全重叠无切除时，当前砖块会变大。</p>
+                <p>2）在堆的过程中，浮动的“砖块”整个掉落，楼层数未增加，即游戏结束。</p>
+                <p>3）游戏结束时，还可选择“分享复活”，即可在当前楼层上复活继续堆。</p>
+                <p>4）每局游戏结束，且楼层在10层以上的，如不选择“分享复活”，即可参与抽奖，抽奖后可重新再玩。堆楼的层数越多，抽的奖品价值越大。</p>
+                <p>三、活动奖品</p>
+                <p>1、奖品等级8个，堆的楼层越多，抽的奖品价值越大。如堆到50层即可抽二至八等奖内奖品。具体奖品如下：</p>
+                <table>
+                    <tbody><tr>
+                        <td width="10%">奖品</td>
+                        <td width="20%">堆塔层数</td>
+                        <td width="20%">-</td>
+                        <td width="20%">商品名称</td>
+                        <td width="15%">价值</td>
+                        <td width="15%">领取方式</td>
+                    </tr>
+                    <tr>
+                        <td>一等奖</td>
+                        <td>55</td>
+                        <td>-</td>
+                        <td>西部数据(WD) Blue系列 1TB 固态硬盘(WDS100T1B0A)</td>
+                        <td>2999</td>
+                        <td>兑换券</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2">二等奖</td>
+                        <td rowspan="2">50</td>
+                        <td>-</td>
+                        <td>金士顿16G内存</td>
+                        <td>1199</td>
+                        <td>京券</td>
+                    </tr>
+                    <tr>
+                        <td>-</td>
+                        <td>金士顿16G内存</td>
+                        <td>1399</td>
+                        <td>京券</td>
+                    </tr>
+                    <tr>
+                        <td>三等奖</td>
+                        <td>45</td>
+                        <td>-</td>
+                        <td>东芝 1TB 移动硬盘</td>
+                        <td>899</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td>四等奖</td>
+                        <td>40</td>
+                        <td>-</td>
+                        <td>金士顿240G 固态硬盘</td>
+                        <td>599</td>
+                        <td>京券</td>
+                    </tr>
+                    <tr>
+                        <td>五等奖</td>
+                        <td>35</td>
+                        <td>无</td>
+                        <td>希捷羽绒服</td>
+                        <td>400</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3">六等奖</td>
+                        <td rowspan="3">30</td>
+                        <td>-</td>
+                        <td>闪迪至尊极速16GB U盘</td>
+                        <td>149</td>
+                        <td>兑换券</td>
+                    </tr>
+                    <tr>
+                        <td>-</td>
+                        <td>台电乐耀32G高速 防水U盘</td>
+                        <td>99.9</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td>无</td>
+                        <td>西部数据多功能按摩器</td>
+                        <td>99</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td>七等奖</td>
+                        <td>20</td>
+                        <td>-</td>
+                        <td>金士顿 16GB U盘</td>
+                        <td>39.9</td>
+                        <td>兑换券</td>
+                    </tr>
+                    <tr>
+                        <td>八等奖</td>
+                        <td>10</td>
+                        <td>&nbsp;</td>
+                        <td>存储品类优惠券</td>
+                        <td>5</td>
+                        <td>东券</td>
+                    </tr>
+                    </tbody></table>
+                <p>2、活动期间，同一帐号每个等级奖品最多可获得一个奖品。同一个京东帐号、微信帐号、手Q帐号视为同一账号，不可重复参与获奖。</p>
+                <p>3、奖品数量有限，发完即止；</p>
+                <p>4、奖品领取及使用提醒：</p>
+                <p>1）填地址发奖：此类实物奖品由品牌方直接寄送，请中奖后立即填写签收地址，填写截止时间2016年12月20日23点59分59秒，逾期未填正确有效的签收地址视为自愿放弃奖品。</p>
+                <p>2）兑换券： 此类为实物兑换奖券，中奖后请在活动时间内兑换，兑换截止时间2016年12月22日23点59分59秒。逾期未兑换视为自愿放弃奖品。</p>
+                <p>3）京券：此类为指定商品京券，抽中京券的请在活动时间内使用，使用截止时间2016年12月22日23点59分59秒。逾期未使用视为自愿放弃奖品。(注意京券不找零，建议可选择指定商品中高价值使用)。</p>
+                <p>5、实物奖品会在活动结束后的7个工作日内核实中奖用户不存在恶意作弊行为，且填写信息真实有效，则会联系奖品提供商寄出奖品，实物奖品以届时收到的商品为准，活动页面中的奖品信息仅供参考。</p>
+                <p>6、奖品有效期：2016年12月15日0点-2016年12月22日，所有京/东券可进入微信/手机QQ购物个人中心-我的京东券中进行查看，具体使用有效期以实际到账的优惠券详情为准，逾期未使用视为自动放弃；</p>
+                <p>四、补充说明</p>
+                <p>1、本次活动的所有奖品优惠券均遵守京东优惠券使用相关规则；</p>
+                <p>2、优惠券的使用以订单为准，每笔订单可使用一张优惠券，本次发放的优惠券如成功下单后取消订单或后期退换货，优惠券概不返还，不再享受本次活动优惠；</p>
+                <p>3、活动过程中，凡以不正当手段（作弊、恶意套现、虚假交易、扰乱系统、实施网络攻击等）参与本次活动的用户，京东有权终止其参与活动，并取消其获奖资格（如奖品已发放，京东有权追回）。</p>
+                <p>4、如遇不可抗力（包括但不限于重大灾害事件、活动受政府机关指令需要停止举办或调整的、活动中存在大面积作弊行为、活动遭受严重网络攻击或因系统故障导致活动中奖名单大批量出错，活动不能正常进行的），京东可取消、修改或暂停本活动，则活动主办方可依相关法律法规主张免责。。</p>
+                <p>5、活动中有任何疑问，可在2016年12月22日17：00：00前，关注京东微信公众号“京东JD.com”或进入“购物--个人中心--“在线客服”咨询反馈。</p>
+                <p>6、京东保留在法律规定的范围内对上述规则进行解释的权利。</p>
+            </div>
+            <a href="javascript:;" class="dia_close" tag="close" title="关闭"></a>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/html" id="home">
+    <!-- S 页面内容 -->
+    <div class="wrapper ind">
+        <div tag="script"></div>
+        <!-- loading S -->
+        <div class="load show">
+            <!-- 开发注意 load 添加 show为显示态 -->
+            <img class="load_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/grid_9b0f1b3b.png" width="100%">
+            <img class="load_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/spots_e5a37132.png" width="100%">
+            <div class="load_con">
+                <img class="load_con_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/load_pic_5abe3787.png" alt="堆塔传奇">
+                <p class="load_con_bar"><span id="progress-bar"></span></p>
+                <p class="load_con_num"><span id="progress-num">0%</span><i>...</i></p>
+            </div>
+        </div>
+        <!-- loading E -->
+
+        <!-- game 游戏代码 S -->
+        <div class="game show" style="visibility: hidden">
+            <div class="app-canvas-bg" style="background-color: #fff"></div>
+            <div class="app-canvas-bg" id="app-canvas-bg"></div>
+            <canvas id="app-canvas"></canvas>
+
+            <div class="score_box">
+                <span id="score">0</span>
+                <span class="combo_score">+5</span>
+            </div>
+
+            <!-- 连击效果 -->
+            <div class="game_combo_box power">
+                <!-- <div class="text_box">解锁音乐模块</div> -->
+                <div class="combo_icon combo_1"></div>
+                <div class="combo_icon combo_2"></div>
+                <div class="combo_icon combo_3"></div>
+                <div class="combo_icon combo_4"></div>
+                <div class="combo_icon combo_5"></div>
+                <div class="combo_icon combo_6"></div>
+            </div>
+            <!-- 连击光效 -->
+            <div class="game_combo_shine"></div>
+            <!-- 连击logo -->
+            <div class="game_combo_logo"></div>
+            <!-- 引导 -->
+            <div class="game-guide">
+                <div class="game-guide-hand"></div>
+                <div class="game-guide-light game-guide-light1"></div>
+                <div class="game-guide-light game-guide-light2"></div>
+            </div>
+            <div class="game-guide-tips">
+                <div class="game-guide-tip game-guide-tip1">堆55层可抽<br>一等奖</div>
+                <div class="game-guide-tip game-guide-tip2">堆40层可抽<br>四等奖</div>
+                <div class="game-guide-tip game-guide-tip3">堆10层可抽<br>八等奖</div>
+            </div>
+            <a href="javascript:;" id="guide-skip" class="game-guide-skip" title="跳过">
+                跳过
+                <svg viewBox="0, 0, 44, 44">
+                    <circle cx="22" cy="22" r="20" stroke-width="2" stroke="#f60000" fill="rgba(0, 0, 0, .6)" stroke-dasharray="140" stroke-dashoffset="0" class="dash-countdown"></circle>
+                </svg>
+            </a>
+        </div>
+        <!-- game 游戏代码 E -->
+
+        <!-- main 主视觉 S -->
+        <div class="main ">
+            <!-- 游戏开始前 S -->
+            <div class="game_before main_con show">
+                <img class="main_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/grid_9b0f1b3b.png" width="100%">
+                <img class="main_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/spots_e5a37132.png" width="100%">
+                <img class="box_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/box_7ee40033.png" width="100%">
+                <img class="slogan" src="//wq.360buyimg.com/fd/h5/1612/store/images/slogan_74205c94.png" width="100%">
+                <img class="logo show" src="//wq.360buyimg.com/fd/h5/1612/store/images/sq_logo_bc6dad92.png" alt="手q" tag="sqlogo">
+                <!--开发注意 加入show 显示当前的logo -->
+                <img class="logo" src="//wq.360buyimg.com/fd/h5/1612/store/images/wx_logo_2f78e2ed.png" alt="微信" tag="wxlogo">
+                <!--开发注意 加入show 显示当前的logo -->
+                <a href="javascript:;" class="spr btn_rule" tag="rule" title="活动规则" wxptag="137282.1.3" mqptag="137283.1.3">活动规则</a>
+                <p class="act_time">12月21日京东存储超值特卖</p>
+                <div class="run_txt" id="scroll_div">
+                    <p id="scroll_begin">
+
+                    </p>
+                    <p id="scroll_end"></p>
+                </div>
+                <div class="main_yp">
+                    <img src="//wq.360buyimg.com/fd/h5/1612/store/images/yp_b8925663.png" alt="硬盘">
+                    <p><span></span></p>
+                </div>
+                <a href="javascript:;" id="start" wxptag="137282.1.1" mqptag="137283.1.1" class="spr gogame_btn" data-enabled="0" title="赢百万大奖">赢百万大奖<span style="right: 1.3rem;" ></span></a>
+                <p class="jion">
+                    <span class="jion_num" tag="joinnum"></span>
+                    <span class="jion_yes"><i><b class="show" tag="subscribeBtn" wxptag="137282.1.2" mqptag="137283.1.2"></b></i>预约存储大促卖场</span>
+                    <!--开发注意 b 添加show 为勾选态 反之不是 -->
+                </p>
+            </div>
+            <!-- 游戏开始前 E -->
+            <!-- 游戏结束 S -->
+            <div class="game_end main_con">
+                <p class="ga_eng"></p>
+                <p class="ga_score" style="line-height: 4rem;">&nbsp;</p>
+                <p class="ga_infor ga_beat" tag="scoreInfo1"></p>
+                <p class="ga_infor ga_gift" tag="scoreInfo2"></p>
+                <div class="ga_peo">
+                    <img src="" alt="logo" tag="endlogo">
+                </div>
+                <a href="javascript:;" class="ga_save" tag="savePic" wxptag="137282.1.4" mqptag="137283.2.4"><i class="spr"></i>保存图像</a>
+                <a href="javascript:;" class="ga_btn_pri" title="返回游戏页" wxptag="137282.4.1" mqptag="137283.4.1">返回游戏页</a>
+                <div class="da_btn_g show">
+                    <a href="javascript:;" title="再玩一次" hash="home" tag="goagain" wxptag="137282.1.3" mqptag="137283.2.3">再玩一次</a>
+                    <a href="javascript:;" title="直接抽奖" tag="drawBtn" wxptag="137282.1.1" mqptag="137283.2.1">直接抽奖</a>
+                    <a href="javascript:;" title="分享复活" tag="resumeBtn" wxptag="137282.1.2" mqptag="137283.2.2">分享复活</a>
+                </div>
+            </div>
+            <!-- 游戏结束 E -->
+        </div>
+        <!-- main 主视觉 E -->
+
+        <!-- goods S -->
+        <div class="goods ">
+            <p class="goods_tlt">奖品陈列柜</p>
+            <ul>
+                <li class="goods_li1">
+                    <div>
+                        <i class="lev">一等奖</i>
+                        <p class="goods_jp">
+                            <span>价值2999元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp1_4fb5e14a.png" alt="奖品">
+                        </p>
+                        <p class="goods_name oneline">55层可抽西部数据固态硬盘</p>
+                        <p class="goods_point"><span>1TB</span></p>
+                    </div>
+                </li>
+                <li class="goods_li2">
+                    <div>
+                        <i class="lev">二等奖</i>
+                        <p class="goods_jp">
+                            <span>价值1399元</span>
+                            <img src="//img11.360buyimg.com/jdphoto/s140x100_jfs/t3853/153/408082015/13193/abfd3e0/58513e3bN5a63a67f.png" alt="奖品">
+                        </p>
+                        <p class="goods_name">50层可抽<br>1399元兑换券</p>
+                    </div>
+                    <div>
+                        <i class="lev">三等奖</i>
+                        <p class="goods_jp">
+                            <span>价值899元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp3_14d3a93a.png" alt="奖品">
+                        </p>
+                        <p class="goods_name">45层可抽<br>东芝移动硬盘</p>
+                    </div>
+                </li>
+                <li class="goods_li2">
+                    <div>
+                        <i class="lev">四等奖</i>
+                        <p class="goods_jp">
+                            <span>价值599元</span>
+                            <img src="//img11.360buyimg.com/jdphoto/s140x100_jfs/t3589/178/2327819306/16905/3bcad48f/58513e3bNf8882799.png" alt="奖品">
+                        </p>
+                        <p class="goods_name">40层可抽<br>599元兑换券</p>
+                    </div>
+                    <div>
+                        <i class="lev">五等奖</i>
+                        <p class="goods_jp">
+                            <span>价值400元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp7_f8fbbf45.png" alt="奖品">
+                        </p>
+                        <p class="goods_name">35层可抽<br>希捷羽绒服</p>
+                    </div>
+                </li>
+                <li class="goods_li3">
+                    <i class="lev">六等奖</i>
+                    <div>
+                        <p class="goods_jp">
+                            <span>价值149元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp9_19da0d47.png" alt="奖品">
+                        </p>
+                        <p class="goods_name2">闪迪U盘</p>
+                    </div>
+                    <div>
+                        <p class="goods_jp">
+                            <span>价值99元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp6_6980d9cd.png" alt="奖品">
+                        </p>
+                        <p class="goods_name2">西部数据按摩器</p>
+                    </div>
+                    <div>
+                        <p class="goods_jp">
+                            <span>价值39.9元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp8_5d2df26f.png" alt="奖品">
+                        </p>
+                        <p class="goods_name2">台电防水U盘</p>
+                    </div>
+                    <p class="goods_name">30层可抽<br>可抽6等奖</p>
+                </li>
+                <li class="goods_li2">
+                    <div>
+                        <i class="lev">七等奖</i>
+                        <p class="goods_jp">
+                            <span>价值39.9元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp5_79f02cef.png" alt="奖品">
+                        </p>
+                        <p class="goods_name">20层可抽<br>金士顿U盘</p>
+                    </div>
+                    <div>
+                        <i class="lev">八等奖</i>
+                        <p class="goods_jp">
+                            <span>价值5元</span>
+                            <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp4_f014db0c.png" alt="奖品">
+                        </p>
+                        <p class="goods_name">10层可抽<br>5元优惠券</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- goods E -->
+
+        <!-- 吸底 S -->
+        <div class="fix_bot " tag="footfix">
+            <nav>
+                <a href="javascript:;" hash="myjoin" tag="myjoin" title="我的奖品" wxptag="137282.6.1" mqptag="137283.6.1">我的奖品</a>
+                <a href="javascript:;" title="去卖场逛逛" tag="gosale" wxptag="137282.6.2" mqptag="137283.6.2">去卖场逛逛</a>
+            </nav>
+        </div>
+        <!-- 吸底 E -->
+
+        <!-- 保存图片 S -->
+        <div class="mask" id="J_dialog_save">
+            <div class="dialog dialog_save show">
+                <!-- 开发注意 加入 dialog_position 为其添加绝对居中样式 加show控制隐藏或显示 -->
+                <div>
+                    <img class="screenshot_img" src="" alt="">
+                    <p>制作成功！长按图片保存吧！</p>
+                </div>
+                <a href="javascript:closePop();" class="dia_close spr"></a>
+            </div>
+        </div>
+        <!-- 保存图片 E -->
+        <!-- 开发注意 此为遮罩层  需添加弹窗的页面都要添加此代码，加入class  show为显示态 -->
+        <div class="dialog dialog_prize dialog_position" style="display:none;" id="bingoshiwudialog">
+            <!-- 1399元兑换券 S-->
+            <div class="dia_prize ">
+                <img src="" tag="img">
+                <p tag="text"></p>
+            </div>
+            <!-- 兑换券 S-->
+            <a href="javascript:;" class="dia_btn" title="填写领奖地址" tag="bingoshiwuBtn">填写领奖地址</a>
+            <a href="javascript:;" class="dia_close" title="关闭" tag="close" wxptag="137282.3.1" mqptag="137283.3.1">x</a>
+        </div>
+        <div class="dialog dialog_prize dialog_position" style="display:none;" id="bingoquandialog">
+            <!-- 优惠券 S-->
+            <div class="dia_pri_yh dia_prize">
+                <img src="" tag="img">
+                <p tag="text"></p>
+            </div>
+            <!-- 优惠券 E-->
+            <a href="javascript:;" class="dia_btn show" hash="myjoin" title="查看我的奖品">查看我的奖品</a>
+            <a href="javascript:;" class="dia_close" tag="close" title="关闭" wxptag="137282.3.1" mqptag="137283.3.1">x</a>
+        </div>
+        <div class="dialog dialog_prize dialog_position" style="display:none;" id="nobingodialog">
+            <!-- 没抽中 S -->
+            <div class="dia_prize">
+                <img src="//wq.360buyimg.com/fd/h5/1612/store/images/dia_pri3_dbe53f96.png">
+                <p>手一滑奖品溜走了，再抽一遍<br>试试！大奖还在等着你</p>
+            </div>
+            <!-- 没抽中 E -->
+            <a href="javascript:;" class="dia_btn" title="继续叠抽大奖" hash="home" wxptag="137282.3.2" mqptag="137283.3.2">继续叠抽大奖</a>
+            <a href="javascript:;" class="dia_close" tag="close" title="关闭" wxptag="137282.3.1" mqptag="137283.3.1">x</a>
+        </div>
+        <div class="dialog dialog_rule dialog_position" tag="rulediv">
+            <!-- 开发注意 加入 dialog_position 为其添加绝对居中样式，加show控制隐藏或显示 -->
+            <p class="dia_r_t">活动规则</p>
+            <div class="dia_t_b">
+                <p>一、活动时间：2016年12月15日 00:00:00-12月20日23:59:59；</p>
+                <p>二、参与方式</p>
+                <p>1、进入“堆塔传奇”活动页面，点击“开始游戏”进入游戏页面， 当上方浮动的“砖块”正好与下面砖块完全重叠时，用手指触动手机屏，由此一层层堆起来。注意：</p>
+                <p>1）在堆的过程中，未完全重叠部分边角将会被切除，当连续三块砖块完全重叠无切除时，当前砖块会变大。</p>
+                <p>2）在堆的过程中，浮动的“砖块”整个掉落，楼层数未增加，即游戏结束。</p>
+                <p>3）游戏结束时，还可选择“分享复活”，即可在当前楼层上复活继续堆。</p>
+                <p>4）每局游戏结束，且楼层在10层以上的，如不选择“分享复活”，即可参与抽奖，抽奖后可重新再玩。堆楼的层数越多，抽的奖品价值越大。</p>
+                <p>三、活动奖品</p>
+                <p>1、奖品等级8个，堆的楼层越多，抽的奖品价值越大。如堆到50层即可抽二至八等奖内奖品。具体奖品如下：</p>
+                <table>
+                    <tbody><tr>
+                        <td width="10%">奖品</td>
+                        <td width="20%">堆塔层数</td>
+                        <td width="20%">-</td>
+                        <td width="20%">商品名称</td>
+                        <td width="15%">价值</td>
+                        <td width="15%">领取方式</td>
+                    </tr>
+                    <tr>
+                        <td>一等奖</td>
+                        <td>55</td>
+                        <td>-</td>
+                        <td>西部数据(WD) Blue系列 1TB 固态硬盘(WDS100T1B0A)</td>
+                        <td>2999</td>
+                        <td>兑换券</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2">二等奖</td>
+                        <td rowspan="2">50</td>
+                        <td>-</td>
+                        <td>金士顿16G内存</td>
+                        <td>1199</td>
+                        <td>京券</td>
+                    </tr>
+                    <tr>
+                        <td>-</td>
+                        <td>金士顿16G内存</td>
+                        <td>1399</td>
+                        <td>京券</td>
+                    </tr>
+                    <tr>
+                        <td>三等奖</td>
+                        <td>45</td>
+                        <td>-</td>
+                        <td>东芝 1TB 移动硬盘</td>
+                        <td>899</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td>四等奖</td>
+                        <td>40</td>
+                        <td>-</td>
+                        <td>金士顿240G 固态硬盘</td>
+                        <td>599</td>
+                        <td>京券</td>
+                    </tr>
+                    <tr>
+                        <td>五等奖</td>
+                        <td>35</td>
+                        <td>无</td>
+                        <td>希捷羽绒服</td>
+                        <td>400</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3">六等奖</td>
+                        <td rowspan="3">30</td>
+                        <td>-</td>
+                        <td>闪迪至尊极速16GB U盘</td>
+                        <td>149</td>
+                        <td>兑换券</td>
+                    </tr>
+                    <tr>
+                        <td>-</td>
+                        <td>台电乐耀32G高速 防水U盘</td>
+                        <td>99.9</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td>无</td>
+                        <td>西部数据多功能按摩器</td>
+                        <td>99</td>
+                        <td>填地址发奖</td>
+                    </tr>
+                    <tr>
+                        <td>七等奖</td>
+                        <td>20</td>
+                        <td>-</td>
+                        <td>金士顿 16GB U盘</td>
+                        <td>39.9</td>
+                        <td>兑换券</td>
+                    </tr>
+                    <tr>
+                        <td>八等奖</td>
+                        <td>10</td>
+                        <td>&nbsp;</td>
+                        <td>存储品类优惠券</td>
+                        <td>5</td>
+                        <td>东券</td>
+                    </tr>
+                    </tbody></table>
+                <p>2、活动期间，同一帐号每个等级奖品最多可获得一个奖品。同一个京东帐号、微信帐号、手Q帐号视为同一账号，不可重复参与获奖。</p>
+                <p>3、奖品数量有限，发完即止；</p>
+                <p>4、奖品领取及使用提醒：</p>
+                <p>1）填地址发奖：此类实物奖品由品牌方直接寄送，请中奖后立即填写签收地址，填写截止时间2016年12月20日23点59分59秒，逾期未填正确有效的签收地址视为自愿放弃奖品。</p>
+                <p>2）兑换券： 此类为实物兑换奖券，中奖后请在活动时间内兑换，兑换截止时间2016年12月22日23点59分59秒。逾期未兑换视为自愿放弃奖品。</p>
+                <p>3）京券：此类为指定商品京券，抽中京券的请在活动时间内使用，使用截止时间2016年12月22日23点59分59秒。逾期未使用视为自愿放弃奖品。(注意京券不找零，建议可选择指定商品中高价值使用)。</p>
+                <p>5、实物奖品会在活动结束后的7个工作日内核实中奖用户不存在恶意作弊行为，且填写信息真实有效，则会联系奖品提供商寄出奖品，实物奖品以届时收到的商品为准，活动页面中的奖品信息仅供参考。</p>
+                <p>6、奖品有效期：2016年12月15日0点-2016年12月22日，所有京/东券可进入微信/手机QQ购物个人中心-我的京东券中进行查看，具体使用有效期以实际到账的优惠券详情为准，逾期未使用视为自动放弃；</p>
+                <p>四、补充说明</p>
+                <p>1、本次活动的所有奖品优惠券均遵守京东优惠券使用相关规则；</p>
+                <p>2、优惠券的使用以订单为准，每笔订单可使用一张优惠券，本次发放的优惠券如成功下单后取消订单或后期退换货，优惠券概不返还，不再享受本次活动优惠；</p>
+                <p>3、活动过程中，凡以不正当手段（作弊、恶意套现、虚假交易、扰乱系统、实施网络攻击等）参与本次活动的用户，京东有权终止其参与活动，并取消其获奖资格（如奖品已发放，京东有权追回）。</p>
+                <p>4、如遇不可抗力（包括但不限于重大灾害事件、活动受政府机关指令需要停止举办或调整的、活动中存在大面积作弊行为、活动遭受严重网络攻击或因系统故障导致活动中奖名单大批量出错，活动不能正常进行的），京东可取消、修改或暂停本活动，则活动主办方可依相关法律法规主张免责。。</p>
+                <p>5、活动中有任何疑问，可在2016年12月22日17：00：00前，关注京东微信公众号“京东JD.com”或进入“购物--个人中心--“在线客服”咨询反馈。</p>
+                <p>6、京东保留在法律规定的范围内对上述规则进行解释的权利。</p>
+            </div>
+            <a href="javascript:;" class="dia_close" tag="close" title="关闭"></a>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/html" id="myjoin">
+    <div class="wrapper" style="height: 100%;overflow: auto">
+        <div class="my_prize">
+            <ul class="pri_list" tag="prizelist">
+
+            </ul>
+            <p class="pri_p" tag="hasbingo" style="display: none"></p>
+            <p class="pri_p" tag="noprize" style="display: none">还没有获得奖品，快去玩游戏，大奖等你哟～</p>
+            <a href="javascript:;" class="spr pri_btn" hash="home" title="返回游戏页">返回游戏页</a>
+        </div>
+        <!-- 吸底 S -->
+        <div class="fix_bot one" style="display: block">
+            <!-- 开发注意 加入 one 表示吸底为一个按钮状态  默认2个 -->
+            <nav>
+                <a href="javascript:;" tag="gosale" title="去卖场逛逛" wxptag="137282.6.2" mqptag="137283.6.2">去卖场逛逛</a>
+            </nav>
+        </div>
+        <!-- 吸底 E -->
+    </div>
+
+</script>
+
+
+<script type="text/html" id="report">
+    <div class="wrapper">
+        <div class="address">
+            <div class="get_prize">
+                <p class="grt_txt_p1">恭喜您获得</p>
+                <p class="grt_txt_p2" tag="prizename"></p>
+            </div>
+            <p class="p_tips">写下你的具体信息，完成领奖流程哦</p>
+            <ul class="address_inp" tag="submitInfo">
+                <li>
+                    <p>收件人</p><input type="text" placeholder="姓名"></li>
+                <li>
+                    <p>手机号</p><input type="text" placeholder="手机号码或电话号码"></li>
+                <li>
+                    <p>地址</p><input type="text" placeholder="省／市／县区／街道地址"></li>
+            </ul>
+            <a class="address_btn" href="javascript:;" tag="submitBtn"></a>
+            <p class="p_ps">＊请填写准确信息，以便于我们为您发货</p>
+        </div>
+        <!-- 吸底 S -->
+        <!--<div class="fix_bot show one">-->
+        <!--<nav>-->
+        <!--<a href="javascript:;" tag="gosale" title="去卖场逛逛">去卖场逛逛</a>-->
+        <!--</nav>-->
+        <!--</div>-->
+        <!-- 吸底 E -->
+        <div class="dialog dialog_sub dialog_position" tag="success">
+            <!-- 开发注意 加入 dialog_position 为其添加绝对居中样式，加show控制隐藏或显示 -->
+            <p>提交成功，获得如此大奖<br>还不炫耀一下么</p>
+            <a href="javascript:;" class="dia_btn show" title="炫耀一下" tag="xuanshare">炫耀一下</a>
+            <a href="javascript:;" class="dia_close" title="关闭" tag="close">x</a>
+        </div>
+        <div class="dialog dialog_sub dialog_position" tag="change">
+            <!-- 开发注意 加入 dialog_position 为其添加绝对居中样式，加show控制隐藏或显示 -->
+            <p>地址修改成功！</p>
+            <a href="javascript:;" class="dia_btn show" title="炫耀一下" hash="home">返回游戏首页</a>
+            <a href="javascript:;" class="dia_close" tag="close" title="关闭">x</a>
+        </div>
+        <div class="dialog dialog_sub dialog_position" tag="fail">
+            <!-- 开发注意 加入 dialog_position 为其添加绝对居中样式，加show控制隐藏或显示 -->
+            <p tag="failtext"></p>
+            <a href="javascript:;" class="dia_close" tag="closeSp" title="关闭">x</a>
+        </div>
+    </div>
+</script>
+
+
+<!-- E 页面内容 -->
+
+<script>
+    //loadedPercent(100);
+</script>
+
+<!--#include virtual="/sinclude/jsi/wg.market.towergame.shtml"-->
+
+
+<!-- S 引用前端页面片  构建游戏js页面片，script src = ""-->
+<!-- #include virtual="/sinclude/cssi/fd/h5/1612/store/game_js.shtml" -->
+<!-- E 引用前端页面片 -->
+<!--#include virtual="/sinclude/promote/foot_promote.html"-->
+<!--#include virtual="/sinclude/common/foot.shtml" -->
+</body>
+
+</html>

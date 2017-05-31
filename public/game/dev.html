@@ -1,0 +1,535 @@
+<html lang="zh-CN" style="height: 100%; overflow: hidden;">
+<head>
+    <meta charset="utf-8">
+    <title>游戏页面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- S 引用前端页面片 -->
+    <!-- #include virtual="/sinclude/cssi/fd/h5/1612/store/game.shtml" -->
+    <link combofile="/fd/h5/201611/store/game.shtml" rel="stylesheet" href="//wq.360buyimg.com/c/=/fd/h5/1612/gb/css/gb.min_36e3d5c3.css,/fd/h5/1612/store/css/cp_style.min_a3b74e78.css,/fd/h5/1612/store/css/gamestyle.min_b21cea8d.css">
+    <!-- E 引用前端页面片 -->
+
+    <script type="text/javascript">
+        ! function() {
+            var maxWidth = 768;
+            document.write('<style id="o2HtmlFontSize"></style>');
+            var o2_resize = function() {
+                        var cw, ch;
+                        if (document && document.documentElement) {
+                            cw = document.documentElement.clientWidth, ch = document.documentElement.clientHeight;
+                        }
+                        if (!cw || !ch) {
+                            if (window.localStorage["o2-cw"] && window.localStorage["o2-ch"]) {
+                                cw = parseInt(window.localStorage["o2-cw"]), ch = parseInt(window.localStorage["o2-ch"]);
+                            } else {
+                                chk_cw(); //定时检查
+                                return; //出错了
+                            }
+                        }
+                        var zoom = maxWidth && maxWidth < cw ? maxWidth / 375 : cw / 375,
+                                zoomY = ch / 603; //由ip6 weChat
+                        window.localStorage["o2-cw"] = cw, window.localStorage["o2-ch"] = ch;
+                        //zoom=Math.min(zoom,zoomY);//保证ip6 wechat的显示比率
+                        window.zoom = window.o2Zoom = zoom;
+                        document.getElementById("o2HtmlFontSize").innerHTML = 'html{font-size:' + (zoom * 20) + 'px;}.o2-zoom,.zoom{zoom:' + (zoom / 2) + ';}.o2-scale{-webkit-transform: scale(' + zoom / 2 + '); transform: scale(' + zoom / 2 + ');}';
+                    },
+                    siv,
+                    chk_cw = function() {
+                        if (siv) return; //已经存在
+                        siv = setInterval(function() {
+                            //定时检查
+                            document && document.documentElement && document.documentElement.clientWidth && document.documentElement.clientHeight && (o2_resize(), clearInterval(siv), siv = undefined);
+                        }, 100);
+                    };
+            o2_resize(); //立即初始化
+            window.addEventListener("resize", o2_resize);
+        }();
+    </script>
+</head>
+<!-- 注：加ontouchstart使css：active生效 -->
+<body ontouchstart>
+<!-- S 页面内容 -->
+<div class="wrapper ind">
+    <!-- loading S -->
+  <div class="load show"><!-- 开发注意 load 添加 show为显示态 -->
+    <img class="load_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/grid_9b0f1b3b.png" width="100%">
+    <img class="load_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/spots_e5a37132.png" width="100%">
+    <div class="load_con">
+      <img class="load_con_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/load_pic_5abe3787.png" alt="堆塔传奇">
+      <p class="load_con_bar"><span id="progress-bar"></span></p>
+      <p class="load_con_num"><span id="progress-num">0%</span><i>...</i></p>
+    </div>
+  </div>
+    <!-- loading E -->
+
+    <!-- game 游戏代码 S -->
+  <div class="game show" style="visibility: hidden">
+        <div class="app-canvas-bg" style="background-color: #fff"></div>
+    <div class="app-canvas-bg" id="app-canvas-bg"></div>
+    <canvas id="app-canvas"></canvas>
+        <div class="score_box">
+      <span id="score">0</span>
+            <span class="combo_score">+5</span>
+        </div>
+
+        <!-- 连击效果 -->
+    <div class="game_combo_box power">
+            <!-- <div class="text_box">解锁音乐模块</div> -->
+            <div class="combo_icon combo_1"></div>
+            <div class="combo_icon combo_2"></div>
+            <div class="combo_icon combo_3"></div>
+            <div class="combo_icon combo_4"></div>
+            <div class="combo_icon combo_5"></div>
+            <div class="combo_icon combo_6"></div>
+        </div>
+        <!-- 连击光效 -->
+    <div class="game_combo_shine"></div>
+        <!-- 连击logo -->
+    <div class="game_combo_logo"></div>
+        <!-- 引导 -->
+        <div class="game-guide">
+            <div class="game-guide-hand"></div>
+            <div class="game-guide-light game-guide-light1"></div>
+            <div class="game-guide-light game-guide-light2"></div>
+        </div>
+    <div class="game-guide-tips">
+            <div class="game-guide-tip game-guide-tip1">堆90层可抽<br>一等奖</div>
+            <div class="game-guide-tip game-guide-tip2">堆60层可抽<br>四等奖</div>
+            <div class="game-guide-tip game-guide-tip3">堆10层可抽<br>八等奖</div>
+        </div>
+    <a href="javascript:;" id="guide-skip" class="game-guide-skip" title="跳过">
+            跳过
+            <svg viewBox="0, 0, 44, 44">
+                <circle cx="22" cy="22" r="20" stroke-width="2" stroke="#f60000" fill="rgba(0, 0, 0, .6)" stroke-dasharray="140" stroke-dashoffset="0" class="dash-countdown"></circle>
+            </svg>
+        </a>
+    </div>
+    <!-- game 游戏代码 E -->
+
+    <!-- main 主视觉 S -->
+    <div class="main ">
+        <!-- 游戏开始前 S -->
+        <div class="game_before main_con show">
+            <img class="main_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/grid_9b0f1b3b.png" width="100%">
+            <img class="main_bg_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/spots_e5a37132.png" width="100%">
+            <img class="box_pic" src="//wq.360buyimg.com/fd/h5/1612/store/images/box_7ee40033.png" width="100%">
+            <img class="slogan" src="//wq.360buyimg.com/fd/h5/1612/store/images/slogan_74205c94.png" width="100%">
+            <img class="logo show" src="//wq.360buyimg.com/fd/h5/1612/store/images/sq_logo_bc6dad92.png" alt="手q">
+            <!--开发注意 加入show 显示当前的logo -->
+            <img class="logo" src="//wq.360buyimg.com/fd/h5/1612/store/images/wx_logo_2f78e2ed.png" alt="微信">
+            <!--开发注意 加入show 显示当前的logo -->
+            <a href="javascript:alert('敬请期待!');" class="spr btn_rule" title="活动规则">活动规则</a>
+            <p class="act_time">12月21日京东存储超值特卖</p>
+            <div class="run_txt" id="scroll_div">
+                <p id="scroll_begin">
+                    <span>1跑马灯跑马灯跑马灯</span>
+                    <span>2跑马灯跑马灯跑马灯</span>
+                    <span>3跑马灯跑马灯跑马灯</span>
+                    <span>4跑马灯跑马灯跑马灯</span>
+                    <span>5跑马灯跑马灯跑马灯</span>
+                    <span>6跑马灯跑马灯跑马灯</span>
+                    <span>7跑马灯跑马灯跑马灯</span>
+                </p>
+                <p id="scroll_end"></p>
+            </div>
+            <div class="main_yp">
+                <img src="//wq.360buyimg.com/fd/h5/1612/store/images/yp_b8925663.png" alt="硬盘">
+                <p><span></span></p>
+            </div>
+            <a href="javascript:;" id="start" class="spr gogame_btn" data-enabled="0" title="开始游戏">开始游戏<span></span></a>
+            <p class="jion">
+                <span class="jion_num">已有13439人参与</span>
+                <span class="jion_yes"><i><b class="show"></b></i>预约存储大促卖场</span>
+                <!--开发注意 b 添加show 为勾选态 反之不是 -->
+            </p>
+        </div>
+        <!-- 游戏开始前 E -->
+        <!-- 游戏结束 S -->
+        <div class="game_end main_con ">
+            <p class="ga_eng">Score</p>
+            <p class="ga_score">&nbsp;</p>
+            <p class="ga_infor ga_beat">击败全国56%的玩家</p>
+            <p class="ga_infor ga_gift">现可抽3等奖，继续堆到80层可以抽一等奖哦～</p>
+            <div class="ga_peo">
+                <img src="//wq.360buyimg.com/fd/h5/1612/store/images/peo_logo1_2899ad2f.png" alt="logo">
+            </div>
+            <a href="javascript:;" class="ga_save"><i class="spr"></i>保存图像</a>
+            <a href="javascript:alert('敬请期待!');" class="ga_btn_pri" title="立即抽大奖">立即抽大奖</a>
+            <div class="da_btn_g show">
+                <a href="javascript:alert('敬请期待!');" title="直接抽奖">直接抽奖</a>
+                <a href="javascript:alert('敬请期待!');" title="分享复活">分享复活</a>
+            </div>
+        </div>
+        <!-- 游戏结束 E -->
+    </div>
+    <!-- main 主视觉 E -->
+
+    <!-- goods S -->
+    <div class="goods ">
+        <p class="goods_tlt">奖品陈列柜</p>
+        <ul>
+            <li class="goods_li1">
+                <div>
+                    <i class="lev">一等奖</i>
+                    <p class="goods_jp">
+                        <span>价值2299元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp1_4fb5e14a.png" alt="奖品">
+                    </p>
+                    <p class="goods_name oneline">80层可抽西部数据固态硬盘</p>
+                    <p class="goods_point"><span>利益点利益</span><span>利益点利益</span></p>
+                </div>
+            </li>
+            <li class="goods_li2">
+                <div>
+                    <i class="lev">二等奖</i>
+                    <p class="goods_jp">
+                        <span>价值1399元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp10_f06b4c0b.png" alt="奖品">
+                    </p>
+                    <p class="goods_name">60层可抽<br>1399元兑换券</p>
+                </div>
+                <div>
+                    <i class="lev">三等奖</i>
+                    <p class="goods_jp">
+                        <span>价值899元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp3_14d3a93a.png" alt="奖品">
+                    </p>
+                    <p class="goods_name">40层可抽<br>东芝移动硬盘</p>
+                </div>
+            </li>
+            <li class="goods_li2">
+                <div>
+                    <i class="lev">四等奖</i>
+                    <p class="goods_jp">
+                        <span>价值599元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp2_cab1b760.png" alt="奖品">
+                    </p>
+                    <p class="goods_name">30层可抽<br>599元兑换券</p>
+                </div>
+                <div>
+                    <i class="lev">五等奖</i>
+                    <p class="goods_jp">
+                        <span>价值2299元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp7_f8fbbf45.png" alt="奖品">
+                    </p>
+                    <p class="goods_name">20层可抽<br>希捷羽绒服</p>
+                </div>
+            </li>
+            <li class="goods_li3">
+                <i class="lev">六等奖</i>
+                <div>
+                    <p class="goods_jp">
+                        <span>价值119元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp9_19da0d47.png" alt="奖品">
+                    </p>
+                    <p class="goods_name2">闪迪U盘</p>
+                </div>
+                <div>
+                    <p class="goods_jp">
+                        <span>价值2299元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp6_6980d9cd.png" alt="奖品">
+                    </p>
+                    <p class="goods_name2">西部数据按摩器</p>
+                </div>
+                <div>
+                    <p class="goods_jp">
+                        <span>价值2299元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp8_5d2df26f.png" alt="奖品">
+                    </p>
+                    <p class="goods_name2">台电防水U盘</p>
+                </div>
+                <p class="goods_name">40层可抽<br>可抽3等奖</p>
+            </li>
+            <li class="goods_li2">
+                <div>
+                    <i class="lev">七等奖</i>
+                    <p class="goods_jp">
+                        <span>价值39元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp5_79f02cef.png" alt="奖品">
+                    </p>
+                    <p class="goods_name">20层可抽<br>金士顿U盘</p>
+                </div>
+                <div>
+                    <i class="lev">八等奖</i>
+                    <p class="goods_jp">
+                        <span>价值2299元</span>
+                        <img src="//wq.360buyimg.com/fd/h5/1612/store/images/goods_jp4_f014db0c.png" alt="奖品">
+                    </p>
+                    <p class="goods_name">20层可抽<br>5元优惠券</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <!-- goods E -->
+
+    <!-- 吸底 S -->
+    <div class="fix_bot ">
+        <nav>
+            <a href="my-prize.html" title="我的奖品">我的奖品</a>
+            <a href="javascript:alert('敬请期待!');" title="去卖场逛逛">去卖场逛逛</a>
+        </nav>
+    </div>
+    <!-- 吸底 E -->
+
+    <!-- 保存图片 S -->
+    <div class="mask" id="J_dialog_save">
+        <div class="dialog dialog_save show">
+            <!-- 开发注意 加入 dialog_position 为其添加绝对居中样式 加show控制隐藏或显示 -->
+            <div>
+                <img class="screenshot_img" src="" alt="">
+                <p>制作成功！长按图片保存吧！</p>
+            </div>
+            <a href="javascript:closePop();" class="dia_close spr"></a>
+        </div>
+    </div>
+    <!-- 保存图片 E -->
+    <!-- 开发注意 此为遮罩层  需添加弹窗的页面都要添加此代码，加入class  show为显示态 -->
+    <div class="mask"></div>
+</div>
+<!-- E 页面内容 -->
+<script src="http://wq.360buyimg.com/fd/promote/base/zepto.min.js"></script>
+<!-- <script src="//wq.360buyimg.com/fd/promote/base/zepto.min.js"></script> -->
+<script type="text/javascript">
+    // 不到一屏时 全屏显示
+var wrHeight = $(".wrapper").height();
+
+function wReset(){
+        var winHeight = $(window).height();
+  console.log(wrHeight,winHeight)
+  if( wrHeight< winHeight){
+    $(".wrapper").css("height",winHeight);
+        }
+    }
+
+    wReset();
+
+$(window).resize(function(){
+        wReset();
+    })
+    // 跑马灯
+function ScrollImgLeft(){
+  var speed=30
+        var scroll_begin = document.getElementById("scroll_begin");
+        var scroll_end = document.getElementById("scroll_end");
+        var scroll_div = document.getElementById("scroll_div");
+
+  scroll_end.innerHTML=scroll_begin.innerHTML
+
+  function Marquee(){
+    if(scroll_end.offsetWidth-scroll_div.scrollLeft<=0){
+      scroll_div.scrollLeft-=scroll_begin.offsetWidth
+      }
+      else{
+                scroll_div.scrollLeft++
+            }
+        }
+  var MyMar=setInterval(Marquee,speed)
+    }
+    // 关闭弹窗
+    function closePop() {
+        $("#J_dialog_save").removeClass("show");
+    }
+</script>
+
+
+<script  src="js/playcanvas-dev.js"></script>
+
+<!-- init.js -->
+<script>
+    $(".jion_yes").click(function(){
+        $(this).find("b").toggleClass("show");
+    });
+
+    //var CONFIG_FILENAME = "./config.json";
+    var canvas, devices, app;
+
+    //ASSET_PREFIX = "static/";
+    SCENE_PATH = "images/json/dev.json";
+
+    CONTEXT_OPTIONS = {
+        'alpha': true, // 这里表示背景透明
+        'preserveDrawingBuffer': false,
+    };
+
+    SCRIPTS = [];
+    pc.script.legacy = true;
+    pc.gameRestart = function() {
+        if(pc._gameRestart) {
+            pc._gameRestart();
+        } else {
+            var siv = setInterval(function() {
+                if(pc._gameRestart) {
+                    clearInterval(siv);
+                    pc._gameRestart();
+                }
+            }, 300); // 轮询
+        }
+    }
+
+    pc.showGame = function() { // 显示游戏DOM
+        $('.game').css('visibility', 'visible');
+    }
+
+</script>
+
+
+<script src="js/__start__.js"></script>
+<script src="js/__loading__.js"></script>
+
+
+
+
+<script type="text/javascript">
+  var combo_flag = 0;
+  var style_arr = ["music", "video", "power", "photo"];
+  var combo_text = {
+    "music": "解锁音乐模块",
+    "video": "解锁投影模块",
+    "power": "解锁电源模块",
+    "photo": "解锁相机模块",
+  };
+    var psoriasis = "images/coupon.png"; // 两边的小广告
+    $(".game_combo_box .combo_icon").on("webkitAnimationEnd", function() {
+        $(".game_combo_box").attr("class", "game_combo_box");
+    });
+    $(".score_box .combo_score").on("webkitAnimationEnd", function() {
+        $(".score_box .combo_score").removeClass("combo");
+    });
+    $(".game_combo_shine").on("webkitTransitionEnd", function() {
+        $(this).removeClass("combo");
+    });
+    $(".game_combo_logo").on("webkitAnimationEnd", function() {
+        $('.game_combo_logo').attr("class", "game_combo_logo");
+    });
+  $(".ga_save").on('click', function(){
+        pc.render({
+            title: "",
+            score: pc.score,
+            subt1: "击败全国50%的玩家",
+            subt2: "现可抽3等奖，继续堆到80层可以抽一等奖哦～",
+            env: "wechat", // 环境 wechat/sq
+            callback: function(src) {
+                // 显示弹窗
+                $("#J_dialog_save").addClass("show");
+                $(".screenshot_img").attr("src", src);
+
+            }
+        });
+    })
+
+  function setComboStyle(type) {
+    // $(".game_combo_box .text_box").text(combo_text[type]);
+    $(".game_combo_box").addClass("show combo " + type);
+    if (combo_flag < 4) {
+      combo_flag++;
+      // $(".score_box .combo_score").addClass("combo");
+    }
+  }
+
+    function setComboShine() {
+        $(".game_combo_shine").addClass("combo");
+    }
+
+    function setComboLogo(type, data) {
+        var _rem = $('html').css('font-size');
+        _rem = Number(_rem.replace('px', ''));
+    var _top = $(window).height() / 2 + _rem*3.8;
+    $(".game_combo_logo").css({"left": data.x, "top": _top});
+    $(".game_combo_logo").addClass('combo logo'+type);
+    $(".game_combo_logo").animate({"top": _top+_rem*0.6}, 800);
+    }
+    // handlers for game
+    function loadedHandle() {
+    pc.skipGuide = 0;// 表示跳过引导
+        // $('.game').addClass('show');
+    if(!pc.skipGuide) {
+            pc.showGame();
+            $(".game .game-guide-skip").addClass("show");
+        }
+    }
+
+    function startHandle() {
+        pc.showGame();
+        $(".game_before").removeClass('show');
+    }
+
+    function comboHandle(data) {
+    console.log('combo:' + JSON.stringify(data));
+        // 连击
+    var item = style_arr[Math.floor(Math.random() * style_arr.length)];
+    setComboStyle(item);
+        setComboShine();
+    if (data.scaleX>1.2 && data.scaleZ>1.2) {
+      setComboLogo(Math.floor(Math.random() * 6)+1, data);
+    }
+
+  }
+
+  function scoreUpdateHandle(score) {
+
+  }
+
+    function gameoverHandle(info) {
+        $(".game_end").addClass('show');
+    }
+    var gameLife = _gameLife = 2; // 续命次数为3
+    var gameResumeCB,
+    gameResume = function () {
+                --gameLife > 0 && $(".game_end").removeClass('show'); // 隐藏层
+                gameResumeCB && gameResumeCB(gameLife > 0);
+            };
+    function gameResumeHandle(cb) {
+        // 续命通知
+        // cb(--gameLife > 0);
+        gameResumeCB = cb;
+    }
+
+    function restartHandle() {
+        // 重新开始游戏
+        gameLife = _gameLife;
+        $(".game_end").removeClass('show');
+        console.log("restartHandle");
+    }
+
+    function guideOverHandle() {
+        $(".game .game-guide").removeClass("show");
+        $(".game .game-guide-skip").removeClass("show");
+        $(".game .game-guide-tips").removeClass("show");
+
+        $('.main,.goods,.fix_bot').addClass('show');
+        $('.main .game_before').addClass('show');
+    $("body,html,.wrapper").css({"height":"auto","overflow":"auto"});
+
+        // 500ms之后，开始才可点击，防止误操作。
+    setTimeout(function(){
+            $("#start").attr('data-enabled', 1);
+        }, 500);
+    }
+
+    function guideStartHandle() {
+        $(".game .game-guide-tips").addClass("show");
+    }
+
+    function guideStepPauseHandle(step) {
+        $('.game .game-guide').addClass("show");
+    }
+
+    function guideStepPlayHandle() {
+        $('.game .game-guide').removeClass("show");
+
+    }
+
+</script>
+<script type="text/javascript">
+    // load
+    var $load = $(".load");
+if($load.hasClass("show")){
+  $("body,html,.wrapper").css({"height":"100%","overflow":"hidden"})
+    }
+</script>
+
+
+</body></html>
